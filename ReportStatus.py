@@ -11,7 +11,7 @@ full_file = os.path.abspath(os.path.join(file_name))
 
 def update_fields():
     global i, flag, network_label, contact_label, hardware_label, software_label, errors, warnings
-    global dFlag, last_run, diagnostic_label, sys_time, peripheral, peripheral_label
+    global dFlag, last_run, diagnostic_label, sys_time, peripheral, peripheral_label, call_label
     # System Info - Hardware and Software
     hardware_label[0] = Label(tab1, text='Hardware Information', padx=5, pady=5, font=("Arial Bold", 12))
     hardware_label[1] = Label(tab1, text='Serial', padx=5, pady=5, font=("Arial", 12))
@@ -124,11 +124,32 @@ def update_fields():
                                 , relief=RIDGE)
     peripheral_label.grid(column=0, row=1, sticky=W, columnspan=2)
 
-
-
     # Call-Details
-    lbl3 = Label(tab3, text='label2')
-    lbl3.grid(column=0, row=0)
+    temp = []
+    if call.find('Status').text != 'Connected':
+        temp.append('No live call at the moment')
+    else:
+        temp.append("AnswerState - " + call.find('AnswerState').text + "\n\nCallType - " + str(call.find('CallType').text) +
+                        "\n\nProtocol - " + str(call.find('Protocol').text) + "\n\nDirection - "
+                    + str(call.find('Direction').text) + "\n\nDuration - " + str(call.find('Duration').text) +
+                    "\n\nPlacedOnHold - " + str(call.find('PlacedOnHold').text) + "  |  Encryption - " +
+                    str(call.find('Encryption').find('Type').text) +
+                    "\n\nReceiveCallRate - " + str(call.find('ReceiveCallRate').text) +
+                    "  |  TransmitCallRate - " + str(call.find('TransmitCallRate').text) +
+                    "\n\nCallbackNumber - " + str(call.find('CallbackNumber').text) +
+                    "\n\nRemoteNumber - " + str(call.find('RemoteNumber').text))
+
+    temp = "\n".join(str(p) for p in temp)
+    lbl3 = Label(tab3, text='Calls (Live)', padx=5, pady=5, font=("Arial Bold", 12))
+    lbl3.grid(column=0, row=0, sticky=W, columnspan=2)
+
+    if flag[2] == 1:
+        flag[2] = 0
+        call_label = Label(tab3, text=temp, padx=5, pady=5, font=("Arial", 12), wraplength=600, justify=LEFT
+                           , relief=RIDGE)
+    else:
+        call_label.config(text=temp, padx=5, pady=5, font=("Arial", 12), wraplength=600, justify=LEFT, relief=RIDGE)
+    call_label.grid(column=0, row=1, sticky=W, columnspan=2)
 
     # Network Tab
     for i in range(len(network)):
@@ -165,52 +186,6 @@ def update_fields():
 
 
 def update():
-    # with open('status.xml') as fd:
-    #     doc = xmltodict.parse(fd.read())
-    #     # hardware_serial
-    #     hardware[0] = doc['Status']['SystemUnit']['Hardware']['Module']['SerialNumber']
-    #     # hardware_temp
-    #     hardware[1] = doc['Status']['SystemUnit']['Hardware']['Temperature']
-    #     # hardware_fanSpeeds
-    #     hardware[2] = [fan['Status'] for fan in doc['Status']['SystemUnit']['Hardware']['Monitoring']['Fan']]
-    #     #
-    #     software[0] = doc['Status']['SystemUnit']['Software']['Name']
-    #     software[1] = doc['Status']['SystemUnit']['Software']['Version']
-    #     software[2] = doc['Status']['SystemUnit']['Software']['ReleaseDate']
-    #     software[3] = doc['Status']['SystemUnit']['Software']['OptionKeys']['Encryption']
-    #     software[4] = doc['Status']['SystemUnit']['Software']['OptionKeys']['MultiSite']
-    #     software[5] = doc['Status']['SystemUnit']['Software']['OptionKeys']['PremiumResolution']
-    #     software[6] = doc['Status']['SystemUnit']['Software']['OptionKeys']['RemoteMonitoring']
-    #     #
-    #     last_run[0] = doc['Status']['SystemUnit']['Diagnostics']['LastRun']['#text']
-    #
-    #     errors[:] = []
-    #     warnings[:] = []
-    #     for message in doc['Status']['SystemUnit']['Diagnostics']['Message']:
-    #         # print type([message['Level']])
-    #         if [message['Level']['#text']] == ['Error']:
-    #             errors.append(message['Description']['#text'])
-    #         else:
-    #             warnings.append(message['Description']['#text'])
-    #     #
-    #     peripherals = doc['Status']['Peripherals']['ConnectedDevice']
-    #     # If camera show complete details
-    #     # for device in doc['Status']['Peripherals']['ConnectedDevice']:
-    #     # if device['Type']['#text'] == ['Camera']:
-    #     #
-    #     # mac_address
-    #     network[0] = doc['Status']['Network']['Ethernet']['MacAddress']
-    #     #IPv4
-    #     network[1] = doc['Status']['Network']['IPv4']['Address']
-    #     #IPv6
-    #     network[2] = doc['Status']['Network']['IPv6']['Address']
-    #     #
-    #     sys_time[0] = doc['Status']['Time']['SystemTime']
-    #     #
-    #     contact[0] = doc['Status']['UserInterface']['ContactInfo']['Name']
-    #     #
-    #     # CALL
-
     dom = ElementTree.parse(full_file)
     hardware[0] = dom.find('SystemUnit').find('Hardware').find('Module').find('SerialNumber').text
     hardware[1] = dom.find('SystemUnit').find('Hardware').find('Temperature').text
@@ -246,6 +221,9 @@ def update():
     for peripheral_device in dom.find('Peripherals').findall('ConnectedDevice'):
         peripheral.append(peripheral_device)
 
+    global call
+    call = dom.find('Call')
+
     update_fields()
     window.after(updateDelay, update)
 
@@ -268,6 +246,8 @@ sys_time = ['']
 i = 0
 peripheral = []
 peripheral_label = ''
+call = ''
+call_label = ''
 
 window = Tk()
 window.title("Cisco Video Endpoint Diagnostic Tool")
