@@ -675,6 +675,16 @@
         <References item="1"></References>
         <Type item="1">MicrophoneDisconnected</Type>
       </Message>
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
       <Message item="5">
         <Description item="1">NTP is not correctly configured. If the system clock is not correctly configured, certain features (e.g. encryption) may fail.</Description>
         <Level item="1">Warning</Level>

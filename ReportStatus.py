@@ -5,7 +5,7 @@ from xml.etree import ElementTree
 
 # In ms enter the delay to update
 updateDelay = 1000
-file_name = 'status.xml'
+file_name = 'status.xml'  # provide the file path
 full_file = os.path.abspath(os.path.join(file_name))
 
 
@@ -40,28 +40,14 @@ def update_fields():
             software_label[8+i].config(text=software[i], padx=5, pady=5, font=("Arial", 12))
 
     hardware_label[0].grid(column=0, row=0, sticky=W)
-    hardware_label[1].grid(column=0, row=1, sticky=W)
-    hardware_label[2].grid(column=0, row=2, sticky=W)
-    hardware_label[3].grid(column=0, row=3, sticky=W)
-    hardware_label[4].grid(column=1, row=1, sticky=W)
-    hardware_label[5].grid(column=1, row=2, sticky=W)
-    hardware_label[6].grid(column=1, row=3, sticky=W)
+    for i in range(1, 4):
+        hardware_label[i].grid(column=0, row=i, sticky=W)
+        hardware_label[i+3].grid(column=1, row=i, sticky=W)
 
-    software_label[0].grid(column=0, row=4, sticky=W)
-    software_label[1].grid(column=0, row=5, sticky=W)
-    software_label[2].grid(column=0, row=6, sticky=W)
-    software_label[3].grid(column=0, row=7, sticky=W)
-    software_label[4].grid(column=0, row=8, sticky=W)
-    software_label[5].grid(column=0, row=9, sticky=W)
-    software_label[6].grid(column=0, row=10, sticky=W)
-    software_label[7].grid(column=0, row=11, sticky=W)
-    software_label[8].grid(column=1, row=5, sticky=W)
-    software_label[9].grid(column=1, row=6, sticky=W)
-    software_label[10].grid(column=1, row=7, sticky=W)
-    software_label[11].grid(column=1, row=8, sticky=W)
-    software_label[12].grid(column=1, row=9, sticky=W)
-    software_label[13].grid(column=1, row=10, sticky=W)
-    software_label[14].grid(column=1, row=11, sticky=W)
+    for i in range(0, 8):
+        software_label[i].grid(column=0, row=4+i, sticky=W)
+    for i in range(0, 7):
+        software_label[i+8].grid(column=1, row=5+i, sticky=W)
 
     # System Info - Diagnostic Information
     diagnostic_label[0] = Label(tab6, text='SysInfo - Diagnosis', padx=5, pady=5, font=("Arial Bold", 12))
@@ -100,17 +86,16 @@ def update_fields():
     diagnostic_label[6].grid(column=0, row=5, sticky=W, columnspan=2)
     diagnostic_label[8].grid(column=0, row=6, sticky=W, columnspan=2)
 
-
     # Peripherals
     temp = []
     for p in peripheral:
         if p.find('Type').text != 'Camera':
             temp.append("Device: " + p.find('Type').text)
         else:
-            temp.append("Device-" + p.find('Type').text + " | HardwareInfo-" + str(p.find('HardwareInfo').text) +
+            temp.append("Device: " + p.find('Type').text + "\nHardwareInfo-" + str(p.find('HardwareInfo').text) +
                         " | ID-" + str(p.find('ID').text) + " | Name-" + str(p.find('Name').text) + " | SoftwareInfo-" +
                         str(p.find('SoftwareInfo').text) + " | Status-" + str(p.find('Status').text)
-                        + " | UpgradeStatus-" + str(p.find('UpgradeStatus').text))
+                        + " | UpgradeStatus-" + str(p.find('UpgradeStatus').text) + " |")
         temp.append("\n")
     temp = "\n".join(str(p) for p in temp)
     lbl2 = Label(tab2, text='Connected Devices', padx=5, pady=5, font=("Arial Bold", 12))
@@ -129,8 +114,8 @@ def update_fields():
     if call.find('Status').text != 'Connected':
         temp.append('No live call at the moment')
     else:
-        temp.append("AnswerState - " + call.find('AnswerState').text + "\n\nCallType - " + str(call.find('CallType').text) +
-                        "\n\nProtocol - " + str(call.find('Protocol').text) + "\n\nDirection - "
+        temp.append("AnswerState - "+call.find('AnswerState').text+"\n\nCallType - " + str(call.find('CallType').text)
+                    + "\n\nProtocol - " + str(call.find('Protocol').text) + "\n\nDirection - "
                     + str(call.find('Direction').text) + "\n\nDuration - " + str(call.find('Duration').text) +
                     "\n\nPlacedOnHold - " + str(call.find('PlacedOnHold').text) + "  |  Encryption - " +
                     str(call.find('Encryption').find('Type').text) +
@@ -273,4 +258,6 @@ tab_control.pack(expand=1, fill='both')
 
 window.after(100, update)
 window.wm_iconbitmap('ir_dark.ico')
+separator = Frame(height=2, bd=1, relief=SUNKEN)
+separator.pack(fill=X, padx=5, pady=5)
 window.mainloop()
